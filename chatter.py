@@ -43,7 +43,10 @@ words = [x.rstrip().lower() for x in open("/usr/share/dict/words")]
 
 words_per_word = 4
 words_per_voice = 5
-commands = "[[rate 1]]"
+
+# For information on these commands, see Apple's Speech Synthesis Programming Guide.
+# https://developer.apple.com/library/mac/documentation/UserExperience/Conceptual/SpeechSynthesisProgrammingGuide/FineTuning/FineTuning.html#//apple_ref/doc/uid/TP40004365-CH5-SW10
+commands = "[[rate 1]][[volm 0.1]]"
 
 while True:
     voice = random.choice(voices)
