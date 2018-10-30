@@ -25,16 +25,21 @@ from __future__ import absolute_import, division, print_function
 import os
 import random
 import subprocess
+import six
 import time
 
 def find_voices():
     voice_list_output = subprocess.check_output(['say', '-v', '?'])
+    if six.PY3:
+        voice_list_output = voice_list_output.decode('utf-8')
     voices = set(line.strip().split()[0] for line in voice_list_output.strip().split('\n'))
     
     # Blacklist too basically-high-pitched or plain voices
     voices -= {'Moira'}
+    # Just doesn't work at all
+    voices -= {'Anna'}
     
-    return list(voices)
+    return sorted(voices)
 
     # In the old days, we had a hardcoded list of the builtin voices that were suitable. But the classic wacky voices are gone now. R.I.P.
     #     "Agnes",
@@ -60,17 +65,18 @@ def chatter(
         words,
         commands="[[rate 100]][[volm 0.1]][[pbas - 100]]",
         words_per_word=4,
-        words_per_voice=5):
+        words_per_voice=5,
+        time_per_voice=10):
     # For information on the commands, see Apple's Speech Synthesis Programming Guide.
     # https://developer.apple.com/library/mac/documentation/UserExperience/Conceptual/SpeechSynthesisProgrammingGuide/FineTuning/FineTuning.html#//apple_ref/doc/uid/TP40004365-CH5-SW10
     # [[rate 1]] used to work for very slow, but as of macOS 10.13.6 seems to be ignored.
 
     while True:
         voice = random.choice(voices)
-        text = " ".join("".join(random.sample(words, words_per_word)) for _ in xrange(words_per_voice))
+        text = " ".join("".join(random.sample(words, words_per_word)) for _ in range(words_per_voice))
         print(voice, "-", text)
         os.spawnlp(os.P_NOWAIT, "say", "say", "-v", voice, commands, text)
-        time.sleep(10)
+        time.sleep(time_per_voice)
     
 def main():
     voices = find_voices()
