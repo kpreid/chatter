@@ -65,7 +65,7 @@ def chatter(
         words,
         commands="[[rate 100]][[volm 0.1]][[pbas - 100]]",
         words_per_word=4,
-        words_per_voice=5,
+        words_per_voice=10,
         time_per_voice=10):
     # For information on the commands, see Apple's Speech Synthesis Programming Guide.
     # https://developer.apple.com/library/mac/documentation/UserExperience/Conceptual/SpeechSynthesisProgrammingGuide/FineTuning/FineTuning.html#//apple_ref/doc/uid/TP40004365-CH5-SW10
