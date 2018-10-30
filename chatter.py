@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright 2010, 2014 Kevin Reid
+# Copyright 2010, 2014, 2018 Kevin Reid
 # 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -20,37 +20,65 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-import os, random, time
+from __future__ import absolute_import, division, print_function
 
-voices = [
-    "Agnes",
-    "Albert",
-    "Alex",
-    "Bahh",
-    "Boing",
-    "Bruce",
-    "Bubbles",
-    "Deranged",
-    "Fred",
-    "Ralph",
-    "Vicki",
-    "Whisper",
-    "Zarvox"
-]
+import os
+import random
+import subprocess
+import time
 
-# TODO: Might want to omit some words / use a different list.
-words = [x.rstrip().lower() for x in open("/usr/share/dict/words")]
+def find_voices():
+    voice_list_output = subprocess.check_output(['say', '-v', '?'])
+    voices = set(line.strip().split()[0] for line in voice_list_output.strip().split('\n'))
+    
+    # Blacklist too basically-high-pitched or plain voices
+    voices -= {'Moira'}
+    
+    return list(voices)
 
-words_per_word = 4
-words_per_voice = 5
+    # In the old days, we had a hardcoded list of the builtin voices that were suitable. But the classic wacky voices are gone now. R.I.P.
+    #     "Agnes",
+    #     "Albert",
+    #     "Alex",
+    #     "Bahh",
+    #     "Boing",
+    #     "Bruce",
+    #     "Bubbles",
+    #     "Deranged",
+    #     "Fred",
+    #     "Ralph",
+    #     "Vicki",
+    #     "Whisper",
+    #     "Zarvox"
 
-# For information on these commands, see Apple's Speech Synthesis Programming Guide.
-# https://developer.apple.com/library/mac/documentation/UserExperience/Conceptual/SpeechSynthesisProgrammingGuide/FineTuning/FineTuning.html#//apple_ref/doc/uid/TP40004365-CH5-SW10
-commands = "[[rate 1]][[volm 0.1]]"
+def find_words():
+    # TODO: Might want to omit some words / use a different list.
+    return [x.rstrip().lower() for x in open("/usr/share/dict/words")]
 
-while True:
-    voice = random.choice(voices)
-    text = " ".join("".join(random.sample(words, words_per_word)) for _ in xrange(words_per_voice))
-    print voice, "-", text
-    os.spawnlp(os.P_NOWAIT, "say", "say", "-v", voice, commands, text)
-    time.sleep(10)
+def chatter(
+        voices,
+        words,
+        commands="[[rate 100]][[volm 0.1]][[pbas - 100]]",
+        words_per_word=4,
+        words_per_voice=5):
+    # For information on the commands, see Apple's Speech Synthesis Programming Guide.
+    # https://developer.apple.com/library/mac/documentation/UserExperience/Conceptual/SpeechSynthesisProgrammingGuide/FineTuning/FineTuning.html#//apple_ref/doc/uid/TP40004365-CH5-SW10
+    # [[rate 1]] used to work for very slow, but as of macOS 10.13.6 seems to be ignored.
+
+    while True:
+        voice = random.choice(voices)
+        text = " ".join("".join(random.sample(words, words_per_word)) for _ in xrange(words_per_voice))
+        print(voice, "-", text)
+        os.spawnlp(os.P_NOWAIT, "say", "say", "-v", voice, commands, text)
+        time.sleep(10)
+    
+def main():
+    voices = find_voices()
+    words = find_words()
+    print('Voices: ', voices)
+    chatter(
+        voices=voices,
+        words=words)
+
+if __name__ == '__main__':
+    main()
