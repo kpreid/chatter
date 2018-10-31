@@ -22,10 +22,12 @@
 
 from __future__ import absolute_import, division, print_function
 
+import itertools
 import os
 import random
 import subprocess
 import six
+import sys
 import time
 
 def find_voices():
@@ -64,6 +66,7 @@ def chatter(
         voices,
         words,
         commands="[[rate 100]][[volm 0.1]][[pbas - 100]]",
+        say_args=(),
         words_per_word=4,
         words_per_voice=10,
         time_per_voice=10):
@@ -75,7 +78,11 @@ def chatter(
         voice = random.choice(voices)
         text = " ".join("".join(random.sample(words, words_per_word)) for _ in range(words_per_voice))
         print(voice, "-", text)
-        os.spawnlp(os.P_NOWAIT, "say", "say", "-v", voice, commands, text)
+        os.spawnlp(os.P_NOWAIT, "say", "say",
+            "-v", voice,
+            *itertools.chain(
+                say_args,
+                (commands, text)))
         time.sleep(time_per_voice)
     
 def main():
@@ -84,7 +91,8 @@ def main():
     print('Voices: ', voices)
     chatter(
         voices=voices,
-        words=words)
+        words=words,
+        say_args=sys.argv[1:])
 
 if __name__ == '__main__':
     main()
