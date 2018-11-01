@@ -36,10 +36,16 @@ def find_voices():
         voice_list_output = voice_list_output.decode('utf-8')
     voices = set(line.strip().split()[0] for line in voice_list_output.strip().split('\n'))
     
-    # Blacklist too basically-high-pitched or plain voices
-    voices -= {'Moira'}
-    # Just doesn't work at all
-    voices -= {'Anna'}
+    # Blacklist 
+    voices -= {
+        # Too high pitched and clear
+        'Moira',
+        
+        # Produces no sound under our chosen parameters
+        'Anna',
+        'Alva',
+        'Yuna',
+    }
     
     return sorted(voices)
 
